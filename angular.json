@@ -13,7 +13,6 @@
         "build": {
           "builder": "@angular/build:application",
           "options": {
-            "baseHref": "/ToDoList/",
             "browser": "src/main.ts",
             "tsConfig": "tsconfig.app.json",
             "assets": [
