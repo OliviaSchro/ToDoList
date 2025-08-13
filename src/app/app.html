@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html>
      <!-- Sidebar -->
-     <aside class="sidebar" [class.open]="sidebarOpen" aria-label="Todo lists">
+     <!--<aside class="sidebar" [class.open]="sidebarOpen" aria-label="Todo lists">-->
+     <aside class="sidebar" [class.open]="sidebarOpen" [@sidebarAnim]="sidebarOpen ? 'open' : 'closed'" aria-label="Todo lists">
           <div class="sidebar-header">
                <h2>Lists</h2>
                <button class="icon-btn" type="button" (click)="toggleSidebar()">✕</button>
@@ -10,13 +11,15 @@
           <!-- Adding new list (reactive form!!!) -->
           <form class="add-list" (submit)="$event.preventDefault(); addList()">
                <input
+                    class="btn_txt"
                     type="text"
-                    placeholder="New list name…"
+                    placeholder="Add a new list..."
                     [formControl]="newListName"
                     (keyup.enter)="addList()"
                     aria-label="New list name"
+                    maxlength="35"
                />
-               <button type="button" (click)="addList()" [disabled]="newListName.invalid">Add</button>
+               <button class="btn_add" type="button" (click)="addList()" [disabled]="newListName.invalid" [style.opacity]="newListName.invalid ? 0.3 : 1">Add</button>
           </form>
 
           <!-- Lists -->
@@ -26,16 +29,21 @@
                          <button class="listButton" type="button" (click) = "selectList(list.id)">
                               {{ list.name }} <span class="count">{{ list.todos.length }}</span>
                          </button>
-                         <button class = "deleteButton" type="button" (click) = "deleteList(list.id)" aria-label="Delete list">🗑</button>
+                         <!--ONLY SHOW IT IF ITS NOT LAST LIST REMAINIGN AND ITS SELECTED-->
+                         @if (list.id === selectedListId && lists.length > 1) {
+                              <button class = "delete-btn2" type="button" (click) = "deleteList(list.id)" aria-label="Delete list">-</button>
+                         }
                     </li>
                }
           </ul>
      </aside>
 
      <!-- Main -->
-     <div id="main" [style.marginLeft]="sidebarOpen ? '25%' : '0'">
+     <div id="main" [style.marginLeft]="sidebarOpen ? '25%' : '0'" [@mainAnim]="sidebarOpen ? 'open' : 'closed'">
           <header class="topbar">
-               <button class="icon-btn" type="button" (click)="toggleSidebar()">☰</button>
+               @if (!sidebarOpen) {
+                    <button class="icon-btn" type="button" (click)="toggleSidebar()">☰</button>
+               }
                <h1>My Todo List</h1>
           </header>
 
@@ -46,25 +54,35 @@
                     <!-- Add todo (reactive) -->
                     <div class="add-todo">
                          <input
+                              class="btn_txt"
                               type="text"
                               placeholder="Add a new todo…"
                               [formControl]="newTodo"
                               (keyup.enter)="addTodo()"
                               aria-label="New todo text"
+                              maxlength="150"
                          />
-                         <button type="button" (click)="addTodo()" [disabled]="newTodo.invalid">Add</button>
+                         
+                         <button class="btn_add" type="button" (click)="addTodo()" [disabled]="newTodo.invalid" [style.opacity]="newTodo.invalid ? 0.3 : 1">Add</button>
                     </div>
 
                     <!-- Todos -->
                     <div class="todo-list">
                          @for (todo of list.todos; track todo.id) {
-                              <div class="todo-item" [class.completed]="todo.completed">
-                                   <input
-                                        type="checkbox"
-                                        [checked]="todo.completed"
-                                        (change)="toggleTodo(todo.id)"
-                                        aria-label="Toggle completed"
-                                   />
+                              <div class="todo-item" [class.completed]="todo.completed" [@itemAnim]="'in'">
+                                   <!--start of special checkmark-->
+                                   <div class="checkbox-wrapper-39">
+                                        <label>
+                                             <input 
+                                                  type="checkbox"
+                                                  [checked]="todo.completed"
+                                                  (change)="toggleTodo(todo.id)"
+                                                  aria-label="Toggle completed"
+                                             />
+                                             <span class="checkbox"></span>
+                                        </label>
+                                   </div>
+                                   <!--end of special checkmark-->
                                    <span class="todo-text">{{ todo.text }}</span>
                                    <button class="delete-btn" type="button" (click)="deleteTodo(todo.id)">Delete</button>
                               </div>
@@ -73,11 +91,12 @@
 
                     <!-- Stats -->
                     <div class="stats">
-                         <p>Total: {{ list.todos.length }}</p>
-                         <p>Completed: {{ getCompletedCount() }}</p>
-                         <p>Remaining: {{ getRemainingCount() }}</p>
+                         <p><strong class="stat-label" >Total:</strong> {{ list.todos.length }}</p>
+                         <p><strong class="stat-label">Completed:</strong> {{ getCompletedCount() }}</p>
+                         <p><strong class="stat-label">Remaining:</strong> {{ getRemainingCount() }}</p>
                     </div>
                </div>
           } <!--end of if statement-->
      </div>
 </html>
+

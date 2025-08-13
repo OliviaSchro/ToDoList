@@ -3,6 +3,7 @@ import { Component, signal } from '@angular/core';
 
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormControl, Validators } from '@angular/forms'
+import { trigger, transition, style, state, animate } from '@angular/animations';
 
 interface Todo { // INDIVIDUAL TODO ITEM
   text: string;
@@ -20,7 +21,40 @@ interface TodoList {
   selector: 'app-root',
   imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './app.html',
-  styleUrl: './app.css'
+  styleUrl: './app.css',
+  animations: [
+    trigger('itemAnim', [
+      // add
+      transition(':enter', [
+        style({ opacity: 0, transform: 'translateY(6px) scale(0.98)' }),
+        animate('160ms ease-out', style({ opacity: 1, transform: 'none' })),
+      ]),
+      // delete
+      transition(':leave', [
+        // fade + slide + collapse height/padding/margins/border
+        animate('200ms ease-in', style({
+          opacity: 0,
+          transform: 'translateX(-8px)',
+          height: 0,
+          marginTop: 0,
+          marginBottom: 0,
+          paddingTop: 0,
+          paddingBottom: 0,
+          borderWidth: 0
+        })),
+      ]),
+    ]),
+    trigger('sidebarAnim', [
+      state('closed', style({ transform: 'translateX(-100%)' })),
+      state('open',   style({ transform: 'translateX(0)' })),
+      transition('closed <=> open', animate('280ms ease'))
+    ]),
+    trigger('mainAnim', [
+      state('closed', style({ transform: 'none' })),
+      state('open',   style({ transform: 'translateX(var(--sidebar-w))' })),
+      transition('closed <=> open', animate('280ms ease'))
+    ])
+  ],
 })
 
 export class App {
@@ -31,11 +65,11 @@ export class App {
 
   newListName = new FormControl('', {
     nonNullable: true,
-    validators: [Validators.required, Validators.maxLength(50)]
+    validators: [Validators.required, Validators.maxLength(35)]
   });
   newTodo = new FormControl('', {
     nonNullable: true,
-    validators: [Validators.required, Validators.maxLength(200)]
+    validators: [Validators.required, Validators.maxLength(150)]
   });
 
   lists: TodoList[] = [
